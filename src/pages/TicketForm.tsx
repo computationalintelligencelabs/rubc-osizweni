@@ -93,26 +93,31 @@ export default function TicketForm() {
     e.preventDefault();
     
     if (validateForm()) {
-      // Submit via FormSubmit
+      // Submit to backend server
       try {
         const formDataToSend = new FormData();
         formDataToSend.append('firstName', formData.firstName);
         formDataToSend.append('lastName', formData.lastName);
         formDataToSend.append('ticketType', formData.ticketType);
         formDataToSend.append('price', currentTicket?.price.toString() || '0');
-        formDataToSend.append('_subject', 'New Gala Dinner Ticket Registration');
-        formDataToSend.append('_captcha', 'false');
         if (formData.proofOfPayment) {
           formDataToSend.append('proofOfPayment', formData.proofOfPayment);
         }
         
-        // Send to FormSubmit service
-        await fetch('https://formsubmit.co/rubcosizweni.office@gmail.com', {
+        // Send to backend server
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        const response = await fetch(`${apiUrl}/api/submit-ticket`, {
           method: 'POST',
           body: formDataToSend
         });
+
+        if (!response.ok) {
+          throw new Error('Failed to submit ticket');
+        }
       } catch (error) {
-        // Continue regardless of email service
+        console.error('Error submitting form:', error);
+        setErrors({ submit: 'Failed to submit ticket. Please try again.' });
+        return;
       }
       
       setSubmitted(true);
