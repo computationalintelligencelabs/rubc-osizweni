@@ -182,6 +182,15 @@ export default function TicketForm() {
             <p className="text-lg text-muted-foreground">
               Join us for an unforgettable evening on June 25, 2026
             </p>
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 max-w-3xl mx-auto">
+              <p className="text-xs text-gray-700 leading-relaxed">
+                <span className="font-semibold text-blue-900 block mb-2">📋 Instructions:</span>
+                1. Enter your full name and select your preferred ticket type. 
+                2. Make an EFT payment to Capitec Bank (Account: 2499420282, Branch: 470010). 
+                3. Upload your proof of payment (bank receipt or screenshot). 
+                4. Click "Complete Registration" to submit your ticket booking.
+              </p>
+            </div>
           </div>
         </section>
 
