@@ -20,6 +20,7 @@ export default function TicketForm() {
 
   const [fileName, setFileName] = useState<string>('');
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const ticketTypes = [
@@ -72,6 +73,8 @@ export default function TicketForm() {
     }
   };
 
+  const currentTicket = ticketTypes.find(t => t.id === formData.ticketType);
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
@@ -93,6 +96,9 @@ export default function TicketForm() {
     e.preventDefault();
     
     if (validateForm()) {
+      setIsSubmitting(true);
+      setErrors(prev => ({ ...prev, submit: '' }));
+      
       // Submit to backend server
       try {
         const formDataToSend = new FormData();
@@ -112,22 +118,24 @@ export default function TicketForm() {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to submit ticket');
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Failed to submit ticket');
         }
+        
+        setSubmitted(true);
+        setTimeout(() => {
+          navigate('/events');
+        }, 3000);
       } catch (error) {
         console.error('Error submitting form:', error);
-        setErrors({ submit: 'Failed to submit ticket. Please try again.' });
-        return;
+        setErrors(prev => ({ 
+          ...prev, 
+          submit: error instanceof Error ? error.message : 'Failed to submit ticket. Please try again.' 
+        }));
+        setIsSubmitting(false);
       }
-      
-      setSubmitted(true);
-      setTimeout(() => {
-        navigate('/events');
-      }, 3000);
     }
   };
-
-  const currentTicket = ticketTypes.find(t => t.id === formData.ticketType);
 
   if (submitted) {
     return (
@@ -300,12 +308,23 @@ export default function TicketForm() {
                       )}
                     </div>
 
+                    {/* General Form Error */}
+                    {errors.submit && (
+                      <div className="p-4 rounded-lg bg-red-50 border-2 border-red-200">
+                        <p className="text-red-600 font-medium flex items-center gap-2">
+                          <AlertCircle size={18} />
+                          {errors.submit}
+                        </p>
+                      </div>
+                    )}
+
                     {/* Submit Button */}
                     <button
                       type="submit"
-                      className="w-full py-4 rounded-lg bg-primary text-white font-semibold text-lg hover:bg-primary/90 transition-colors duration-300 shadow-sm hover:shadow-md"
+                      disabled={isSubmitting}
+                      className="w-full py-4 rounded-lg bg-primary text-white font-semibold text-lg hover:bg-primary/90 transition-colors duration-300 shadow-sm hover:shadow-md disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
-                      Complete Registration
+                      {isSubmitting ? 'Submitting...' : 'Complete Registration'}
                     </button>
                   </form>
                 </div>
