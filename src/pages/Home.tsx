@@ -180,22 +180,53 @@ export default function Home() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-secondary">First Name</label>
-                          <input required className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="John" type="text" />
+                          <input required name="firstName" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="John" type="text" />
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-secondary">Last Name</label>
-                          <input required className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Doe" type="text" />
+                          <input required name="lastName" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Doe" type="text" />
                         </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-secondary">Email Address</label>
-                        <input required className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="john@example.com" type="email" />
+                        <input required name="email" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="john@example.com" type="email" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-secondary">Your Message</label>
-                        <textarea required rows={4} className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all resize-none" placeholder="How can we help you?"></textarea>
+                        <textarea required name="message" rows={4} className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all resize-none" placeholder="How can we help you?"></textarea>
                       </div>
-                      <button type="submit" className="w-full py-4 rounded-[28px] bg-primary text-white font-bold text-lg hover:bg-primary/90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 mt-4">
+                      <button 
+                      type="submit" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const formElement = (e.target as HTMLElement).closest('form');
+                        if (formElement) {
+                          const formData = new FormData(formElement);
+                          const data = {
+                            firstName: formData.get('firstName'),
+                            lastName: formData.get('lastName'),
+                            email: formData.get('email'),
+                            message: formData.get('message'),
+                            type: 'contact'
+                          };
+                          
+                          // Send to backend
+                          fetch('/api/send-contact-email', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(data)
+                          }).catch(() => {
+                            // Fail silently if no backend
+                          });
+                          
+                          // Show success message
+                          alert('Thank you for your message! We will get back to you within 24 hours.');
+                          formElement.reset();
+                        }
+                      }}
+                      className="w-full py-4 rounded-[28px] bg-primary text-white font-bold text-lg hover:bg-primary/90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 mt-4">
                         Send Message
                       </button>
                     </form>

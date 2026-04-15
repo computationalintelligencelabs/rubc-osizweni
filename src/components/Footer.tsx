@@ -9,9 +9,7 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-3 mb-6">
               <div className="bg-white p-1 rounded-lg">
-                <div className="w-10 h-10 bg-primary flex items-center justify-center text-white font-bold rounded">
-                  RU
-                </div>
+                <img src="/logo.jpg" alt="Rise-Up Bible Church Logo" className="w-10 h-10 rounded object-cover" />
               </div>
               <h3 className="font-display text-2xl font-bold text-white">Rise-Up</h3>
             </div>

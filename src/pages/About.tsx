@@ -60,10 +60,10 @@ export default function About() {
               <h2 className="text-sm font-bold tracking-widest text-primary uppercase mb-3">Leadership</h2>
               <h3 className="text-3xl md:text-4xl font-display font-bold text-secondary">Meet Our Leaders</h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
-              <div className="bg-background rounded-3xl overflow-hidden border border-border shadow-sm hover:shadow-lg transition-all">
-                <div className="aspect-[4/3] overflow-hidden bg-gray-200">
-                  <img src="/images/dr-joel-motlafi.jpg" alt="Dr. Joel Motlafi" className="w-full h-full object-cover" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 max-w-5xl mx-auto px-2 sm:px-4">
+              <div className="bg-background rounded-2xl sm:rounded-3xl overflow-hidden border border-border shadow-sm hover:shadow-lg transition-all">
+                <div className="aspect-[3/4] overflow-hidden bg-gray-200">
+                  <img src="/images/dr-joel-motlafi.jpg" alt="Dr. Joel Motlafi" className="w-full h-full object-cover object-top" />
                 </div>
                 <div className="p-8">
                   <h4 className="text-2xl font-display font-bold text-secondary mb-1">Dr. Joel Motlafi</h4>
@@ -71,9 +71,9 @@ export default function About() {
                   <p className="text-muted-foreground leading-relaxed">Dr. Joel Motlafi, alongside his wife Mrs. Ellen Motlafi, founded Rise-Up Bible Church with a vision to raise an army for the Lord's end-time harvest.</p>
                 </div>
               </div>
-              <div className="bg-background rounded-3xl overflow-hidden border border-border shadow-sm hover:shadow-lg transition-all">
-                <div className="aspect-[4/3] overflow-hidden bg-gray-200">
-                  <img src="/images/pastor-nkosi.jpg" alt="Pastor Thulani Nkosi" className="w-full h-full object-cover" />
+              <div className="bg-background rounded-2xl sm:rounded-3xl overflow-hidden border border-border shadow-sm hover:shadow-lg transition-all">
+                <div className="aspect-[3/4] overflow-hidden bg-gray-200">
+                  <img src="/images/pastor-nkosi.jpg" alt="Pastor Thulani Nkosi" className="w-full h-full object-cover object-top" />
                 </div>
                 <div className="p-8">
                   <h4 className="text-2xl font-display font-bold text-secondary mb-1">Pastor Thulani Nkosi</h4>

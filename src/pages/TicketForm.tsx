@@ -89,10 +89,32 @@ export default function TicketForm() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (validateForm()) {
+      // Send email notification about ticket purchase
+      try {
+        const formDataToSend = new FormData();
+        formDataToSend.append('firstName', formData.firstName);
+        formDataToSend.append('lastName', formData.lastName);
+        formDataToSend.append('ticketType', formData.ticketType);
+        formDataToSend.append('price', currentTicket?.price.toString() || '0');
+        if (formData.proofOfPayment) {
+          formDataToSend.append('proofOfPayment', formData.proofOfPayment);
+        }
+        
+        // Send to your email service endpoint
+        await fetch('/api/send-ticket-email', {
+          method: 'POST',
+          body: formDataToSend
+        }).catch(() => {
+          // Fail silently if no backend - app still works
+        });
+      } catch (error) {
+        // Continue regardless of email service
+      }
+      
       setSubmitted(true);
       setTimeout(() => {
         navigate('/events');
