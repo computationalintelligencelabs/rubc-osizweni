@@ -104,13 +104,15 @@ export default function TicketForm() {
       });
 
       if (response.ok) {
-        // Refresh the page after successful submission
+        const result = await response.json();
+        alert('✅ Your ticket registration has been submitted successfully!\n\nPlease check your email for confirmation. The church office will verify your payment within 24-48 hours.');
         window.location.reload();
       } else {
-        alert('There was an error submitting your reservation. Please try again.');
+        const error = await response.json();
+        alert(`❌ There was an error submitting your reservation:\n\n${error.error || 'Please try again.'}`);
       }
     } catch (error) {
-      alert('There was an error submitting your reservation. Please try again.');
+      alert('❌ There was an error submitting your reservation. Please check your internet connection and try again.');
     }
   };
 
@@ -157,11 +159,7 @@ export default function TicketForm() {
                     />
                   </div>
                   <style dangerouslySetInnerHTML={{ __html: css }} />
-                  <form id="ticketForm" action="https://formsubmit.co/rubcosizweni.office@gmail.com" method="POST" encType="multipart/form-data" onSubmit={handleSubmit}>
-                    <input type="text" name="_honey" style={{ display: 'none' }} />
-                    <input type="hidden" name="_captcha" value="false" />
-                    <input type="hidden" name="_subject" value="New Gala Dinner Reservation" />
-
+                  <form id="ticketForm" action="/api/submit-ticket" method="POST" encType="multipart/form-data" onSubmit={handleSubmit}>
                     <div className="form-group">
                       <label htmlFor="name">Name and Surname</label>
                       <input type="text" id="name" name="Full_Name" placeholder="Enter your full name" required />
@@ -175,7 +173,7 @@ export default function TicketForm() {
                     <div className="form-group">
                       <label htmlFor="ticket">Type of Ticket</label>
                       <select id="ticket" name="Ticket_Type" required>
-                        <option value="" disabled selected>Select ticket category</option>
+                        <option value="" disabled>Select ticket category</option>
                         <option value="General">General</option>
                         <option value="VIP">VIP</option>
                         <option value="VVIP">VVIP</option>
@@ -183,8 +181,8 @@ export default function TicketForm() {
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="payment">Proof of Payment (Upload Image)</label>
-                      <input type="file" id="payment" name="Proof_of_Payment" accept="image/*" required />
+                      <label htmlFor="payment">Proof of Payment (Upload Image or PDF)</label>
+                      <input type="file" id="payment" name="proofOfPayment" accept="image/*,.pdf" required />
                     </div>
 
                     <button type="submit" className="submit-btn">Submit Reservation</button>

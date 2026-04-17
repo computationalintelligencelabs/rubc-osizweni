@@ -1,47 +1,40 @@
 import express, { Request, Response } from 'express';
 import multer from 'multer';
 import nodemailer from 'nodemailer';
-import path from 'path';
-import fs from 'fs';
 import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
 
-dotenv.config();
+dotenv.config({ path: '.env.local' });
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = Number(process.env.PORT) || 3001;
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabaseBucket = process.env.SUPABASE_BUCKET || 'ticket-uploads';
+
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in environment variables.');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 // CORS Middleware
 app.use((req: Request, res: Response, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
-  
+
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
   next();
 });
 
-// Configure multer for file uploads
-const uploadDir = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
 const upload = multer({
-  storage: storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (req, file, cb) => {
+  fileFilter: (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
     const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
     if (validTypes.includes(file.mimetype)) {
       cb(null, true);
@@ -67,67 +60,105 @@ app.use(express.urlencoded({ extended: true }));
 // Handle ticket registration form submission
 app.post('/api/submit-ticket', upload.single('proofOfPayment'), async (req: Request, res: Response) => {
   try {
-    const { firstName, lastName, ticketType, price } = req.body;
+    const { Full_Name, Email, Ticket_Type } = req.body;
 
-    // Validate required fields
-    if (!firstName || !lastName || !ticketType) {
+    if (!Full_Name || !Email || !Ticket_Type) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    if (!req.file) {
+    if (!req.file?.buffer) {
       return res.status(400).json({ error: 'Proof of payment file is required' });
     }
 
-    // Prepare email content
+    const priceMap: Record<string, number> = {
+      General: 250,
+      VIP: 500,
+      VVIP: 750,
+    };
+    const price = priceMap[Ticket_Type] ?? 250;
+    const storagePath = `ticket-proofs/${Date.now()}-${req.file.originalname}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from(supabaseBucket)
+      .upload(storagePath, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      .from(supabaseBucket)
+      .createSignedUrl(storagePath, 60 * 60 * 24);
+
+    if (signedUrlError || !signedUrlData) {
+      throw signedUrlError || new Error('Failed to create signed URL for proof of payment.');
+    }
+
+    const ticketRecord = {
+      full_name: Full_Name,
+      email: Email,
+      ticket_type: Ticket_Type,
+      price,
+      proof_of_payment_url: signedUrlData.signedUrl,
+      submitted_at: new Date().toISOString(),
+    };
+
+    const { error: insertError } = await supabase.from('tickets').insert(ticketRecord);
+    if (insertError) {
+      throw insertError;
+    }
+
     const emailHTML = `
       <h2>New Gala Dinner Ticket Registration</h2>
-      <p><strong>First Name:</strong> ${firstName}</p>
-      <p><strong>Last Name:</strong> ${lastName}</p>
-      <p><strong>Ticket Type:</strong> ${ticketType}</p>
+      <p><strong>Name:</strong> ${Full_Name}</p>
+      <p><strong>Email:</strong> ${Email}</p>
+      <p><strong>Ticket Type:</strong> ${Ticket_Type}</p>
       <p><strong>Price:</strong> R${price}</p>
-      <p><strong>Proof of Payment:</strong> See attached file</p>
+      <p><strong>Submission Date:</strong> ${new Date().toLocaleString()}</p>
       <hr>
-      <p><em>This ticket registration was submitted on ${new Date().toLocaleString()}</em></p>
+      <p><em>Proof of payment file attached below</em></p>
     `;
 
-    // Send email with attachment
-    const mailOptions = {
+    // Download the file from Supabase to attach to email
+    const { data: fileData, error: downloadError } = await supabase.storage
+      .from(supabaseBucket)
+      .download(storagePath);
+
+    if (downloadError) {
+      console.warn('Warning: Could not download file for email attachment', downloadError);
+    }
+
+    const mailOptions: any = {
       from: process.env.EMAIL_USER || 'rubcosizweni.office@gmail.com',
       to: 'sbongambhele203@gmail.com',
       subject: 'New Gala Dinner Ticket Registration',
       html: emailHTML,
-      attachments: [
+    };
+
+    // Attach file if successfully downloaded
+    if (fileData) {
+      mailOptions.attachments = [
         {
           filename: req.file.originalname,
-          path: req.file.path
-        }
-      ]
-    };
+          content: fileData,
+          contentType: req.file.mimetype,
+        },
+      ];
+    }
 
     await transporter.sendMail(mailOptions);
 
-    // Clean up uploaded file after sending
-    fs.unlink(req.file.path, (err) => {
-      if (err) console.error('Error deleting file:', err);
+    res.json({
+      success: true,
+      message: 'Ticket registration submitted successfully.',
     });
-
-    res.json({ 
-      success: true, 
-      message: 'Ticket registration submitted successfully. Proof of payment attached to email.' 
-    });
-
   } catch (error) {
     console.error('Error processing submission:', error);
-    
-    // Clean up file on error
-    if (req.file) {
-      fs.unlink(req.file.path, (err) => {
-        if (err) console.error('Error deleting file:', err);
-      });
-    }
-
-    res.status(500).json({ 
-      error: 'Failed to process ticket registration. Please try again.' 
+    res.status(500).json({
+      error: 'Failed to process ticket registration. Please try again.',
     });
   }
 });
