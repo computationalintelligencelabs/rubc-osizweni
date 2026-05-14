@@ -83,7 +83,7 @@ export default async (req: Request, context: Context) => {
 
       const mailOptions: any = {
         from: process.env.EMAIL_USER || 'rubcosizweni.office@gmail.com',
-        to: 'sbongambhele203@gmail.com',
+        to: 'rubcosizweni.office@gmail.com',
         subject: 'New Gala Dinner Ticket Registration',
         html: emailHTML,
         attachments: [

@@ -1,8 +1,10 @@
-import { Link } from 'react-router-dom';
-import { User, Clock, ArrowRight, Phone, Send } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { User, Clock, ArrowRight, Phone, Send, CheckCircle } from 'lucide-react';
 import { blogPosts } from '../data';
 
 export default function Home() {
+  const [searchParams] = useSearchParams();
+  const contactSuccess = searchParams.get("contact_success") === "true";
   const latestPosts = blogPosts.slice(0, 3);
 
   return (
@@ -176,33 +178,39 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="md:col-span-3 p-10">
-                    <form className="space-y-6" action="https://formsubmit.co/rubcosizweni.office@gmail.com" method="POST">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-secondary">First Name</label>
-                          <input required name="firstName" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="John" type="text" />
+                    {contactSuccess ? (
+                      <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-12">
+                        <CheckCircle size={64} className="text-green-500" />
+                        <h4 className="font-display text-2xl font-bold text-secondary">Message Sent!</h4>
+                        <p className="text-gray-600">Thank you for reaching out. We will get back to you soon.</p>
+                      </div>
+                    ) : (
+                      <form className="space-y-6" action="/api/submit-contact" method="POST">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-secondary">First Name</label>
+                            <input required name="firstName" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="John" type="text" />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-secondary">Last Name</label>
+                            <input required name="lastName" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Doe" type="text" />
+                          </div>
                         </div>
                         <div className="space-y-2">
-                          <label className="text-sm font-medium text-secondary">Last Name</label>
-                          <input required name="lastName" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Doe" type="text" />
+                          <label className="text-sm font-medium text-secondary">Email Address</label>
+                          <input required name="email" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="john@example.com" type="email" />
                         </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-secondary">Email Address</label>
-                        <input required name="email" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="john@example.com" type="email" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-secondary">Your Message</label>
-                        <textarea required name="message" rows={4} className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all resize-none" placeholder="How can we help you?"></textarea>
-                      </div>
-                      <input type="hidden" name="_subject" value="New Contact Form Submission" />
-                      <input type="hidden" name="_captcha" value="false" />
-                      <button 
-                      type="submit" 
-                      className="w-full py-4 rounded-[28px] bg-primary text-white font-bold text-lg hover:bg-primary/90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 mt-4">
-                        Send Message
-                      </button>
-                    </form>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-secondary">Your Message</label>
+                          <textarea required name="message" rows={4} className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all resize-none" placeholder="How can we help you?"></textarea>
+                        </div>
+                        <button 
+                        type="submit" 
+                        className="w-full py-4 rounded-[28px] bg-primary text-white font-bold text-lg hover:bg-primary/90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 mt-4">
+                          Send Message
+                        </button>
+                      </form>
+                    )}
                   </div>
                 </div>
               </div>
