@@ -1,7 +1,10 @@
 import type { Config, Context } from "@netlify/functions";
+import dotenv from "dotenv";
 import { db } from "../../db/index.js";
 import { contacts } from "../../db/schema.js";
 import nodemailer from "nodemailer";
+
+dotenv.config({ path: ".env.local" });
 
 export default async (req: Request, context: Context) => {
   if (req.method !== "POST") {
@@ -39,25 +42,35 @@ export default async (req: Request, context: Context) => {
     `;
 
     try {
+      const emailUser = process.env.EMAIL_USER?.trim();
+      const emailPassword = process.env.EMAIL_PASSWORD?.replace(/\s+/g, "");
+
+      if (!emailUser || !emailPassword) {
+        console.error("Email configuration missing for contact submission");
+        return Response.json({ error: "Email service is not configured. Please set EMAIL_USER and EMAIL_PASSWORD." }, { status: 500 });
+      }
+
       const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
         auth: {
-          user: process.env.EMAIL_USER || 'rubcosizweni.office@gmail.com',
-          pass: process.env.EMAIL_PASSWORD || ''
-        }
+          user: emailUser,
+          pass: emailPassword,
+        },
       });
 
       const mailOptions = {
-        from: process.env.EMAIL_USER || 'rubcosizweni.office@gmail.com',
-        to: 'rubcosizweni.office@gmail.com',
+        from: emailUser,
+        to: emailUser,
         subject: 'New Contact Form Submission',
         html: emailHTML,
       };
 
       await transporter.sendMail(mailOptions);
-    } catch (emailError) {
-      console.warn("Could not send email:", emailError);
-      // We still return success to the user since the data is stored in the database
+    } catch (emailError: any) {
+      console.error("Contact email delivery failed:", emailError);
+      return Response.json({ error: "Failed to send contact email notification. Please try again later.", details: emailError.message }, { status: 500 });
     }
 
     // Redirect or return success based on how it's called
