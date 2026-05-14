@@ -185,15 +185,22 @@ export default function Home() {
                         <p className="text-gray-600">Thank you for reaching out. We will get back to you soon.</p>
                       </div>
                     ) : (
-                      <form className="space-y-6" action="/api/submit-contact" method="POST">
+                      <form className="space-y-6" action="https://formsubmit.co/rubcosizweni.office@gmail.com" method="POST">
+                        {/* Hidden field for Form Submit API to capture subject */}
+                        <input type="hidden" name="_subject" value="New Contact Form Submission - Rise-Up Bible Church" />
+                        {/* Redirect to success page */}
+                        <input type="hidden" name="_next" value={`${window.location.origin}/?contact_success=true`} />
+                        {/* Enable CAPTCHA */}
+                        <input type="hidden" name="_captcha" value="false" />
+                        
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-secondary">First Name</label>
-                            <input required name="firstName" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="John" type="text" />
+                            <input required name="First Name" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="John" type="text" />
                           </div>
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-secondary">Last Name</label>
-                            <input required name="lastName" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Doe" type="text" />
+                            <input required name="Last Name" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Doe" type="text" />
                           </div>
                         </div>
                         <div className="space-y-2">

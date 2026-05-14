@@ -105,8 +105,9 @@ export default function TicketForm() {
     const formData = new FormData(form);
 
     try {
-      const response = await fetch(form.action, {
-        method: form.method,
+      // Submit to Form Submit API
+      const response = await fetch('https://formsubmit.co/rubcosizweni.office@gmail.com', {
+        method: 'POST',
         body: formData,
       });
 
@@ -115,9 +116,12 @@ export default function TicketForm() {
         form.reset();
         setTicketType('');
         setSelectedFileName('');
+        // Redirect after 2 seconds
+        setTimeout(() => {
+          navigate('/events');
+        }, 2000);
       } else {
-        const error = await response.json();
-        setStatusMessage(`❌ There was an error submitting your reservation: ${error.error || 'Please try again.'}`);
+        setStatusMessage('❌ There was an error submitting your reservation. Please try again.');
       }
     } catch (error) {
       setStatusMessage('❌ There was an error submitting your reservation. Please check your internet connection and try again.');
@@ -186,7 +190,11 @@ export default function TicketForm() {
                     />
                   </div>
                   <style dangerouslySetInnerHTML={{ __html: css }} />
-                  <form id="ticketForm" action="/api/submit-ticket" method="POST" encType="multipart/form-data" onSubmit={handleSubmit}>
+                  <form id="ticketForm" method="POST" encType="multipart/form-data" onSubmit={handleSubmit}>
+                    {/* Form Submit API Configuration */}
+                    <input type="hidden" name="_subject" value="New Gala Dinner Ticket Registration" />
+                    <input type="hidden" name="_captcha" value="false" />
+                    
                     <div className="form-group">
                       <label htmlFor="name">Name and Surname</label>
                       <input type="text" id="name" name="Full_Name" placeholder="Enter your full name" required />
@@ -212,7 +220,7 @@ export default function TicketForm() {
                       <input
                         type="file"
                         id="payment"
-                        name="proofOfPayment"
+                        name="attachment"
                         accept="image/*,.pdf"
                         required
                         onChange={handleFileChange}

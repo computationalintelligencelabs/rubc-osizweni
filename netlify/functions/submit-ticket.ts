@@ -1,3 +1,23 @@
+/**
+ * DEPRECATED: This function is no longer the primary endpoint for ticket form submissions.
+ * 
+ * The ticket form now submits directly to Form Submit API:
+ * - Endpoint: https://formsubmit.co/rubcosizweni.office@gmail.com
+ * - Supports file attachments (proof of payment)
+ * - See: FORM_SUBMISSION_SETUP.md for current integration details
+ * 
+ * This function is kept for reference and can be used for:
+ * - Database storage (if re-enabled)
+ * - Payment verification logic
+ * - Ticket assignment
+ * - Custom processing
+ * 
+ * To use this function again:
+ * 1. Update the form action in /src/pages/TicketForm.tsx to "/api/submit-ticket"
+ * 2. Ensure EMAIL_USER and EMAIL_PASSWORD are set in .env.local
+ * 3. Ensure Netlify Blobs storage is configured
+ */
+
 import type { Config, Context } from "@netlify/functions";
 import dotenv from "dotenv";
 import { getStore } from "@netlify/blobs";

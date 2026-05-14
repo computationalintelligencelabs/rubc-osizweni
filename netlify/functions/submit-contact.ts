@@ -1,3 +1,20 @@
+/**
+ * DEPRECATED: This function is no longer the primary endpoint for contact form submissions.
+ * 
+ * The contact form now submits directly to Form Submit API:
+ * - Endpoint: https://formsubmit.co/rubcosizweni.office@gmail.com
+ * - See: FORM_SUBMISSION_SETUP.md for current integration details
+ * 
+ * This function is kept for reference and can be used for:
+ * - Database storage (if re-enabled)
+ * - Analytics
+ * - Custom processing
+ * 
+ * To use this function again:
+ * 1. Update the form action in /src/pages/Home.tsx to "/api/submit-contact"
+ * 2. Ensure EMAIL_USER and EMAIL_PASSWORD are set in .env.local
+ */
+
 import type { Config, Context } from "@netlify/functions";
 import dotenv from "dotenv";
 import { db } from "../../db/index.js";
