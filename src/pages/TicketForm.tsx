@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const css = `/* Logo Colors */
 :root {
@@ -91,9 +91,16 @@ input[type="file"] {
 
 export default function TicketForm() {
   const navigate = useNavigate();
+  const [ticketType, setTicketType] = useState('');
+  const [selectedFileName, setSelectedFileName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setStatusMessage(null);
+    setIsSubmitting(true);
+
     const form = e.currentTarget;
     const formData = new FormData(form);
 
@@ -104,17 +111,37 @@ export default function TicketForm() {
       });
 
       if (response.ok) {
-        const result = await response.json();
-        alert('✅ Your ticket registration has been submitted successfully!\n\nPlease check your email for confirmation. The church office will verify your payment within 24-48 hours.');
-        window.location.reload();
+        setStatusMessage('✅ Your ticket registration has been submitted successfully. Please check your email for confirmation.');
+        form.reset();
+        setTicketType('');
+        setSelectedFileName('');
       } else {
         const error = await response.json();
-        alert(`❌ There was an error submitting your reservation:\n\n${error.error || 'Please try again.'}`);
+        setStatusMessage(`❌ There was an error submitting your reservation: ${error.error || 'Please try again.'}`);
       }
     } catch (error) {
-      alert('❌ There was an error submitting your reservation. Please check your internet connection and try again.');
+      setStatusMessage('❌ There was an error submitting your reservation. Please check your internet connection and try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  const handleTicketTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setTicketType(event.target.value);
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedFileName(event.target.files?.[0]?.name ?? '');
+  };
+
+  const priceMap: Record<string, number> = {
+    General: 250,
+    VIP: 500,
+    VVIP: 750,
+  };
+
+  const displayTicketType = ticketType || 'General';
+  const displayPrice = priceMap[ticketType] ?? 250;
 
   return (
     <main className="flex-grow pt-20">
@@ -172,7 +199,7 @@ export default function TicketForm() {
 
                     <div className="form-group">
                       <label htmlFor="ticket">Type of Ticket</label>
-                      <select id="ticket" name="Ticket_Type" required>
+                      <select id="ticket" name="Ticket_Type" value={ticketType} onChange={handleTicketTypeChange} required>
                         <option value="" disabled>Select ticket category</option>
                         <option value="General">General</option>
                         <option value="VIP">VIP</option>
@@ -182,14 +209,31 @@ export default function TicketForm() {
 
                     <div className="form-group">
                       <label htmlFor="payment">Proof of Payment (Upload Image or PDF)</label>
-                      <input type="file" id="payment" name="proofOfPayment" accept="image/*,.pdf" required />
+                      <input
+                        type="file"
+                        id="payment"
+                        name="proofOfPayment"
+                        accept="image/*,.pdf"
+                        required
+                        onChange={handleFileChange}
+                      />
+                      {selectedFileName && (
+                        <p className="text-sm text-muted-foreground mt-2">Selected file: {selectedFileName}</p>
+                      )}
                     </div>
 
-                    <button type="submit" className="submit-btn">Submit Reservation</button>
-                    <p className="note">
-                      By submitting, your data will be sent to the church office. <br />
-                      Please allow 24-48 hours for payment verification.
-                    </p>
+                    <button type="submit" className="submit-btn" disabled={isSubmitting}>
+                      {isSubmitting ? 'Submitting…' : 'Submit Reservation'}
+                    </button>
+                    {statusMessage && (
+                      <p className="note" aria-live="polite">{statusMessage}</p>
+                    )}
+                    {!statusMessage && (
+                      <p className="note">
+                        By submitting, your data will be sent to the church office. <br />
+                        Please allow 24-48 hours for payment verification.
+                      </p>
+                    )}
                   </form>
                 </div>
               </div>
@@ -200,11 +244,11 @@ export default function TicketForm() {
                   <div className="space-y-4 mb-6 pb-6 border-b border-border/50">
                     <div className="flex justify-between items-start">
                       <span className="text-sm text-muted-foreground">Ticket Type:</span>
-                      <span className="font-semibold text-secondary text-right">General</span>
+                      <span className="font-semibold text-secondary text-right">{displayTicketType}</span>
                     </div>
                     <div className="flex justify-between items-start">
                       <span className="text-sm text-muted-foreground">Price:</span>
-                      <span className="font-bold text-lg text-primary">R250</span>
+                      <span className="font-bold text-lg text-primary">R{displayPrice}</span>
                     </div>
                   </div>
                   <div className="mb-6">
