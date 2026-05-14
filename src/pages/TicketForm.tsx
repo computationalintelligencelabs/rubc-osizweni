@@ -91,46 +91,8 @@ input[type="file"] {
 
 export default function TicketForm() {
   const navigate = useNavigate();
-  const STATICFORMS_ENDPOINT = import.meta.env.VITE_STATICFORMS_ENDPOINT || 'https://submit.staticforms.xyz/submit';
-  const STATICFORMS_ACCESS_KEY = import.meta.env.VITE_STATICFORMS_ACCESS_KEY || '';
   const [ticketType, setTicketType] = useState('');
   const [selectedFileName, setSelectedFileName] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setStatusMessage(null);
-    setIsSubmitting(true);
-
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-
-    try {
-      // Submit to StaticForms
-      const response = await fetch(STATICFORMS_ENDPOINT, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        setStatusMessage('✅ Your ticket registration has been submitted successfully. Please check your email for confirmation.');
-        form.reset();
-        setTicketType('');
-        setSelectedFileName('');
-        // Redirect after 2 seconds
-        setTimeout(() => {
-          navigate('/events');
-        }, 2000);
-      } else {
-        setStatusMessage('❌ There was an error submitting your reservation. Please try again.');
-      }
-    } catch (error) {
-      setStatusMessage('❌ There was an error submitting your reservation. Please check your internet connection and try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleTicketTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setTicketType(event.target.value);
@@ -192,9 +154,9 @@ export default function TicketForm() {
                     />
                   </div>
                   <style dangerouslySetInnerHTML={{ __html: css }} />
-                  <form id="ticketForm" method="POST" encType="multipart/form-data" onSubmit={handleSubmit}>
-                    {STATICFORMS_ACCESS_KEY && <input type="hidden" name="accessKey" value={STATICFORMS_ACCESS_KEY} />}
-                    <input type="hidden" name="subject" value="New Gala Dinner Ticket Registration" />
+                  <form id="ticketForm" method="POST" action="https://formspree.io/f/myzbbrvn" encType="multipart/form-data">
+                    <input type="hidden" name="_subject" value="New Gala Dinner Ticket Registration" />
+                    <input type="hidden" name="_captcha" value="false" />
                     
                     <div className="form-group">
                       <label htmlFor="name">Name and Surname</label>
@@ -231,18 +193,13 @@ export default function TicketForm() {
                       )}
                     </div>
 
-                    <button type="submit" className="submit-btn" disabled={isSubmitting}>
-                      {isSubmitting ? 'Submitting…' : 'Submit Reservation'}
+                    <button type="submit" className="submit-btn" disabled={false}>
+                      Submit Reservation
                     </button>
-                    {statusMessage && (
-                      <p className="note" aria-live="polite">{statusMessage}</p>
-                    )}
-                    {!statusMessage && (
-                      <p className="note">
-                        By submitting, your data will be sent to the church office. <br />
-                        Please allow 24-48 hours for payment verification.
-                      </p>
-                    )}
+                    <p className="note">
+                      By submitting, your data will be sent to the church office. <br />
+                      Please allow 24-48 hours for payment verification.
+                    </p>
                   </form>
                 </div>
               </div>
