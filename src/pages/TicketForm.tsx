@@ -91,6 +91,8 @@ input[type="file"] {
 
 export default function TicketForm() {
   const navigate = useNavigate();
+  const STATICFORMS_ENDPOINT = import.meta.env.VITE_STATICFORMS_ENDPOINT || 'https://submit.staticforms.xyz/submit';
+  const STATICFORMS_ACCESS_KEY = import.meta.env.VITE_STATICFORMS_ACCESS_KEY || '';
   const [ticketType, setTicketType] = useState('');
   const [selectedFileName, setSelectedFileName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -105,8 +107,8 @@ export default function TicketForm() {
     const formData = new FormData(form);
 
     try {
-      // Submit to Form Submit API
-      const response = await fetch('https://formsubmit.co/rubcosizweni.office@gmail.com', {
+      // Submit to StaticForms
+      const response = await fetch(STATICFORMS_ENDPOINT, {
         method: 'POST',
         body: formData,
       });
@@ -191,9 +193,8 @@ export default function TicketForm() {
                   </div>
                   <style dangerouslySetInnerHTML={{ __html: css }} />
                   <form id="ticketForm" method="POST" encType="multipart/form-data" onSubmit={handleSubmit}>
-                    {/* Form Submit API Configuration */}
-                    <input type="hidden" name="_subject" value="New Gala Dinner Ticket Registration" />
-                    <input type="hidden" name="_captcha" value="false" />
+                    {STATICFORMS_ACCESS_KEY && <input type="hidden" name="accessKey" value={STATICFORMS_ACCESS_KEY} />}
+                    <input type="hidden" name="subject" value="New Gala Dinner Ticket Registration" />
                     
                     <div className="form-group">
                       <label htmlFor="name">Name and Surname</label>
@@ -202,7 +203,7 @@ export default function TicketForm() {
 
                     <div className="form-group">
                       <label htmlFor="email">Email Address</label>
-                      <input type="email" id="email" name="Email" placeholder="name@example.com" required />
+                      <input type="email" id="email" name="email" placeholder="name@example.com" required />
                     </div>
 
                     <div className="form-group">

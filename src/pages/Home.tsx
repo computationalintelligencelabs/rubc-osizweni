@@ -6,6 +6,9 @@ export default function Home() {
   const [searchParams] = useSearchParams();
   const contactSuccess = searchParams.get("contact_success") === "true";
   const latestPosts = blogPosts.slice(0, 3);
+  const STATICFORMS_ENDPOINT = import.meta.env.VITE_STATICFORMS_ENDPOINT || 'https://submit.staticforms.xyz/submit';
+  const STATICFORMS_ACCESS_KEY = import.meta.env.VITE_STATICFORMS_ACCESS_KEY || '';
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
   return (
     <main className="flex-grow pt-20">
@@ -185,13 +188,10 @@ export default function Home() {
                         <p className="text-gray-600">Thank you for reaching out. We will get back to you soon.</p>
                       </div>
                     ) : (
-                      <form className="space-y-6" action="https://formsubmit.co/rubcosizweni.office@gmail.com" method="POST">
-                        {/* Hidden field for Form Submit API to capture subject */}
-                        <input type="hidden" name="_subject" value="New Contact Form Submission - Rise-Up Bible Church" />
-                        {/* Redirect to success page */}
-                        <input type="hidden" name="_next" value={`${window.location.origin}/?contact_success=true`} />
-                        {/* Enable CAPTCHA */}
-                        <input type="hidden" name="_captcha" value="false" />
+                      <form className="space-y-6" action={STATICFORMS_ENDPOINT} method="POST">
+                        {STATICFORMS_ACCESS_KEY && <input type="hidden" name="accessKey" value={STATICFORMS_ACCESS_KEY} />}
+                        <input type="hidden" name="subject" value="New Contact Form Submission - Rise-Up Bible Church" />
+                        <input type="hidden" name="redirectTo" value={`${origin}/?contact_success=true`} />
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                           <div className="space-y-2">
