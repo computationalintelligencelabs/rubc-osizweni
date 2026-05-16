@@ -18,3 +18,10 @@ export const contacts = pgTable("contacts", {
   message: text("message").notNull(),
   submittedAt: timestamp("submitted_at").defaultNow(),
 });
+
+export const registrations = pgTable("registrations", {
+  id: serial().primaryKey(),
+  formName: text("form_name").notNull(),
+  payload: text("payload").notNull(),
+  submittedAt: timestamp("submitted_at").defaultNow(),
+});

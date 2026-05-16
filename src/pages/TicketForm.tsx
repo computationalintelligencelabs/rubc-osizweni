@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, AlertCircle, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { submitTicketForm, validateFile, type TicketFormData } from '../lib/basinService';
 
 const css = `/* Logo Colors */
 :root {
@@ -93,13 +94,74 @@ export default function TicketForm() {
   const navigate = useNavigate();
   const [ticketType, setTicketType] = useState('');
   const [selectedFileName, setSelectedFileName] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const handleTicketTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setTicketType(event.target.value);
+    setError('');
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedFileName(event.target.files?.[0]?.name ?? '');
+    const file = event.target.files?.[0];
+    if (file) {
+      const validation = validateFile(file);
+      if (validation.valid) {
+        setSelectedFile(file);
+        setSelectedFileName(file.name);
+        setError('');
+      } else {
+        setError(validation.error || 'Invalid file');
+        setSelectedFile(null);
+        setSelectedFileName('');
+      }
+    }
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError('');
+    setSuccess(false);
+
+    try {
+      const formElement = event.currentTarget;
+      const fullName = (formElement.querySelector('input[name="Full_Name"]') as HTMLInputElement).value;
+      const email = (formElement.querySelector('input[name="email"]') as HTMLInputElement).value;
+
+      if (!fullName || !email || !ticketType || !selectedFile) {
+        setError('Please fill in all required fields');
+        return;
+      }
+
+      setIsSubmitting(true);
+
+      const data: TicketFormData = {
+        Full_Name: fullName,
+        email,
+        Ticket_Type: ticketType,
+        proofOfPayment: selectedFile,
+      };
+
+      const result = await submitTicketForm(data);
+      setSuccess(true);
+      
+      // Reset form
+      formElement.reset();
+      setTicketType('');
+      setSelectedFileName('');
+      setSelectedFile(null);
+
+      // Redirect after success
+      setTimeout(() => {
+        navigate('/events');
+      }, 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Submission failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const priceMap: Record<string, number> = {
@@ -154,23 +216,38 @@ export default function TicketForm() {
                     />
                   </div>
                   <style dangerouslySetInnerHTML={{ __html: css }} />
-                  <form id="ticketForm" method="POST" action="https://formspree.io/f/myzbbrvn" encType="multipart/form-data">
-                    <input type="hidden" name="_subject" value="New Gala Dinner Ticket Registration" />
-                    <input type="hidden" name="_captcha" value="false" />
-                    
+                  {success && (
+                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex gap-3">
+                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-green-900">Success!</p>
+                        <p className="text-sm text-green-800">Your ticket registration has been submitted. We'll confirm via email shortly.</p>
+                      </div>
+                    </div>
+                  )}
+                  {error && (
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
+                      <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-red-900">Error</p>
+                        <p className="text-sm text-red-800">{error}</p>
+                      </div>
+                    </div>
+                  )}
+                  <form id="ticketForm" onSubmit={handleSubmit}>
                     <div className="form-group">
                       <label htmlFor="name">Name and Surname</label>
-                      <input type="text" id="name" name="Full_Name" placeholder="Enter your full name" required />
+                      <input type="text" id="name" name="Full_Name" placeholder="Enter your full name" required disabled={isSubmitting} />
                     </div>
 
                     <div className="form-group">
                       <label htmlFor="email">Email Address</label>
-                      <input type="email" id="email" name="email" placeholder="name@example.com" required />
+                      <input type="email" id="email" name="email" placeholder="name@example.com" required disabled={isSubmitting} />
                     </div>
 
                     <div className="form-group">
                       <label htmlFor="ticket">Type of Ticket</label>
-                      <select id="ticket" name="Ticket_Type" value={ticketType} onChange={handleTicketTypeChange} required>
+                      <select id="ticket" name="Ticket_Type" value={ticketType} onChange={handleTicketTypeChange} required disabled={isSubmitting}>
                         <option value="" disabled>Select ticket category</option>
                         <option value="General">General</option>
                         <option value="VIP">VIP</option>
@@ -187,14 +264,15 @@ export default function TicketForm() {
                         accept="image/*,.pdf"
                         required
                         onChange={handleFileChange}
+                        disabled={isSubmitting}
                       />
                       {selectedFileName && (
                         <p className="text-sm text-muted-foreground mt-2">Selected file: {selectedFileName}</p>
                       )}
                     </div>
 
-                    <button type="submit" className="submit-btn" disabled={false}>
-                      Submit Reservation
+                    <button type="submit" className="submit-btn" disabled={isSubmitting || success}>
+                      {isSubmitting ? 'Submitting...' : 'Submit Reservation'}
                     </button>
                     <p className="note">
                       By submitting, your data will be sent to the church office. <br />

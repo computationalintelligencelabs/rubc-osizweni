@@ -1,5 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom';
-import { User, Clock, ArrowRight, Phone, Send, CheckCircle } from 'lucide-react';
+import { User, Clock, ArrowRight, Phone, Send, CheckCircle, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { submitContactForm, type ContactFormData } from '../lib/basinService';
 import { blogPosts } from '../data';
 
 export default function Home() {
@@ -7,6 +9,67 @@ export default function Home() {
   const contactSuccess = searchParams.get("contact_success") === "true";
   const latestPosts = blogPosts.slice(0, 3);
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
+
+  const [contactForm, setContactForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contactError, setContactError] = useState('');
+  const [contactSuccess2, setContactSuccess2] = useState(false);
+
+  const handleContactChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setContactForm(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+    setContactError('');
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setContactError('');
+    setContactSuccess2(false);
+
+    try {
+      if (!contactForm.firstName || !contactForm.lastName || !contactForm.email || !contactForm.message) {
+        setContactError('Please fill in all fields');
+        return;
+      }
+
+      setIsSubmitting(true);
+
+      const data: ContactFormData = {
+        firstName: contactForm.firstName,
+        lastName: contactForm.lastName,
+        email: contactForm.email,
+        message: contactForm.message,
+      };
+
+      await submitContactForm(data);
+      setContactSuccess2(true);
+
+      // Reset form
+      setContactForm({
+        firstName: '',
+        lastName: '',
+        email: '',
+        message: '',
+      });
+
+      // Show success message for 3 seconds
+      setTimeout(() => {
+        setContactSuccess2(false);
+      }, 3000);
+    } catch (err) {
+      setContactError(err instanceof Error ? err.message : 'Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main className="flex-grow pt-20">
@@ -179,41 +242,86 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="md:col-span-3 p-10">
-                    {contactSuccess ? (
+                    {contactSuccess2 ? (
                       <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-12">
                         <CheckCircle size={64} className="text-green-500" />
                         <h4 className="font-display text-2xl font-bold text-secondary">Message Sent!</h4>
                         <p className="text-gray-600">Thank you for reaching out. We will get back to you soon.</p>
                       </div>
                     ) : (
-                      <form className="space-y-6" action="https://formspree.io/f/xyzbnpdw" method="POST">
-                        <input type="hidden" name="_subject" value="New Contact Form Submission - Rise-Up Bible Church" />
-                        <input type="hidden" name="_captcha" value="false" />
-                        
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium text-secondary">First Name</label>
-                            <input required name="First Name" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="John" type="text" />
+                      <>
+                        {contactError && (
+                          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
+                            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <p className="font-semibold text-red-900">Error</p>
+                              <p className="text-sm text-red-800">{contactError}</p>
+                            </div>
+                          </div>
+                        )}
+                        <form className="space-y-6" onSubmit={handleContactSubmit}>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium text-secondary">First Name</label>
+                              <input 
+                                required 
+                                name="firstName" 
+                                value={contactForm.firstName}
+                                onChange={handleContactChange}
+                                disabled={isSubmitting}
+                                className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" 
+                                placeholder="John" 
+                                type="text" 
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium text-secondary">Last Name</label>
+                              <input 
+                                required 
+                                name="lastName" 
+                                value={contactForm.lastName}
+                                onChange={handleContactChange}
+                                disabled={isSubmitting}
+                                className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" 
+                                placeholder="Doe" 
+                                type="text" 
+                              />
+                            </div>
                           </div>
                           <div className="space-y-2">
-                            <label className="text-sm font-medium text-secondary">Last Name</label>
-                            <input required name="Last Name" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Doe" type="text" />
+                            <label className="text-sm font-medium text-secondary">Email Address</label>
+                            <input 
+                              required 
+                              name="email" 
+                              value={contactForm.email}
+                              onChange={handleContactChange}
+                              disabled={isSubmitting}
+                              className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" 
+                              placeholder="john@example.com" 
+                              type="email" 
+                            />
                           </div>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-secondary">Email Address</label>
-                          <input required name="email" className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="john@example.com" type="email" />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-secondary">Your Message</label>
-                          <textarea required name="message" rows={4} className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all resize-none" placeholder="How can we help you?"></textarea>
-                        </div>
-                        <button 
-                        type="submit" 
-                        className="w-full py-4 rounded-[28px] bg-primary text-white font-bold text-lg hover:bg-primary/90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 mt-4">
-                          Send Message
-                        </button>
-                      </form>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-secondary">Your Message</label>
+                            <textarea 
+                              required 
+                              name="message" 
+                              value={contactForm.message}
+                              onChange={handleContactChange}
+                              disabled={isSubmitting}
+                              rows={4} 
+                              className="w-full px-4 py-3 rounded-lg border-2 border-border bg-background focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all resize-none" 
+                              placeholder="How can we help you?"
+                            ></textarea>
+                          </div>
+                          <button 
+                            type="submit" 
+                            disabled={isSubmitting}
+                            className="w-full py-4 rounded-[28px] bg-primary text-white font-bold text-lg hover:bg-primary/90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 mt-4 disabled:opacity-50 disabled:cursor-not-allowed">
+                            {isSubmitting ? 'Sending...' : 'Send Message'}
+                          </button>
+                        </form>
+                      </>
                     )}
                   </div>
                 </div>

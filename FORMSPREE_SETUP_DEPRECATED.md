@@ -13,7 +13,7 @@ Formspree has been completely replaced with **Basin Forms API** for better file 
 ### New Implementation
 Both the **Ticket Form** and **Contact Form** now use **Basin Forms API** for email submissions with full file attachment support.
 
-**See**: [BASIN_SETUP_GUIDE.md](BASIN_SETUP_GUIDE.md) for current integration details.
+**👉 See**: [BASIN_SETUP_GUIDE.md](BASIN_SETUP_GUIDE.md) for current integration details.
 
 ---
 
@@ -121,77 +121,3 @@ For current Basin Forms integration support, see:
 
 **Last Updated**: May 16, 2026
 **Status**: Archived (Reference Only)
-
-### Test Ticket Form
-1. Navigate to `/events` page
-2. Click "Register" on Gala Dinner event
-3. Fill in all required fields (Full Name, Email, Ticket Type)
-4. Upload any image or PDF as proof of payment
-5. Click "Submit Reservation"
-6. You should see success message: "✅ Your ticket registration has been submitted successfully"
-7. Check **rubcosizweni.office@gmail.com** for the email with attachment
-
-### Test Contact Form
-1. Navigate to `/` (Home page)
-2. Scroll to "Get in Touch" section
-3. Fill in all fields (First Name, Last Name, Email, Message)
-4. Click "Send Message"
-5. You should see success message with checkmark
-6. Check **rubcosizweni.office@gmail.com** for the email
-
----
-
-## Formspree API Reference
-
-### Special Fields (Formspree-specific)
-
-| Field Name | Purpose | Example |
-|-----------|---------|---------|
-| `_subject` | Custom email subject | "New Gala Dinner Ticket" |
-| `_captcha` | Enable/disable CAPTCHA | false (disabled) |
-| `_next` | Redirect URL on success | Currently removed to use native redirects |
-| `email` | Sender's email address | Required for form |
-
-### Limitations (Free Tier)
-- Unlimited submissions (Formspree is free tier friendly)
-- Email submissions forwarded to your configured email
-- No form responses stored in Formspree dashboard
-- File uploads supported up to reasonable size
-
----
-
-## Troubleshooting
-
-### Form not submitting?
-1. Check browser console for CORS errors
-2. Verify internet connection
-3. Check that email field is named `email` (case-sensitive)
-4. Ensure file is under 25MB for attachment
-
-### Email not received?
-1. Check spam/junk folder
-2. Verify email address is correct in Formspree account
-3. Wait a few minutes for email delivery
-4. Check Formspree status page for outages
-
-### Attachment not included?
-1. Ensure field name is `attachment` (case-sensitive)
-2. Verify file is image or PDF format
-3. Check file size is reasonable
-4. Ensure encType="multipart/form-data" is on form (✓ configured)
-
----
-
-## Next Steps
-
-1. ✅ Both forms configured with Formspree
-2. ✅ Email recipients set to rubcosizweni.office@gmail.com
-3. ⬜ Test both forms in staging/production
-4. ⬜ Monitor first submissions to ensure delivery
-5. ⬜ If issues arise, consider alternative (Email API, Netlify Forms, etc.)
-
----
-
-**Status**: ✅ PRODUCTION READY
-**Last Updated**: May 14, 2026
-**Integrated**: Formspree API v1.0
