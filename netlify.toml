@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+# Use this only if you want to add non-secret defaults here.
+# Environment variables for production should be set in the Netlify dashboard.
+# [[context.production.environment]]
+#   VITE_BASIN_ENDPOINT = "https://basin.glitch.me"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
