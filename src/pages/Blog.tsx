@@ -1,8 +1,19 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { User, Clock, ArrowRight } from 'lucide-react';
+import { setSeoMetadata } from '../lib/seo';
 import { blogPosts } from '../data';
 
 export default function Blog() {
+  useEffect(() => {
+    setSeoMetadata({
+      title: 'Blog | Rise-Up Bible Church',
+      description: 'Insights, teachings, and updates from the pastoral team at Rise-Up Bible Church.',
+      url: window.location.pathname,
+      image: '/logo.jpg',
+    });
+  }, []);
+
   return (
     <main className="flex-grow pt-20">
       <div className="w-full bg-white min-h-screen pb-24">

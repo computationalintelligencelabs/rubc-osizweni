@@ -1,9 +1,19 @@
 import html2canvas from 'html2canvas';
 import { Download } from 'lucide-react';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import { setSeoMetadata } from '../lib/seo';
 
 export default function GalaDinnerPoster() {
   const posterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setSeoMetadata({
+      title: 'Gala Dinner Poster | Rise-Up Bible Church',
+      description: 'Download and share the Rise-Up Bible Church Gala Dinner 2026 poster with event details and church branding.',
+      url: window.location.pathname,
+      image: '/logo.jpg',
+    });
+  }, []);
 
   const downloadPoster = async () => {
     if (posterRef.current) {

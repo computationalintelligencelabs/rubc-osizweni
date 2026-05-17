@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, AlertCircle, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { submitTicketForm, validateFile, type TicketFormData } from '../lib/basinService';
+import { setSeoMetadata } from '../lib/seo';
 
 const css = `/* Logo Colors */
 :root {
@@ -98,6 +99,15 @@ export default function TicketForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    setSeoMetadata({
+      title: 'Gala Dinner Ticket Registration | Rise-Up Bible Church',
+      description: 'Register for the Rise-Up Bible Church Gala Dinner and secure your ticket for the 25 June 2026 celebration.',
+      url: window.location.pathname,
+      image: '/logo.jpg',
+    });
+  }, []);
 
   const handleTicketTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setTicketType(event.target.value);

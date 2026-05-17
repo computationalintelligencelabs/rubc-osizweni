@@ -93,8 +93,11 @@ export default function Footer() {
           </div>
         </div>
         
-        <div className="pt-8 border-t border-white/10 text-center text-gray-500 text-sm">
+        <div className="pt-8 border-t border-white/10 text-center text-gray-500 text-sm space-y-2">
           <p>© 2026 Rise-Up Bible Church. All rights reserved.</p>
+          <p>
+            Developed by <a href="https://climaxintelligence.online" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-white transition-colors">Compute Intelligence</a>
+          </p>
         </div>
       </div>
     </footer>

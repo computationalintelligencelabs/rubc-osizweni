@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { Calendar, MapPin, Clock, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { setSeoMetadata } from '../lib/seo';
 
 export default function Events() {
   const weeklyGatherings = [
@@ -48,6 +50,15 @@ export default function Events() {
       image: "https://images.unsplash.com/photo-1473187983305-f615310e7daa?q=80&w=2940&auto=format&fit=crop"
     }
   ];
+
+  useEffect(() => {
+    setSeoMetadata({
+      title: 'Events & Gatherings | Rise-Up Bible Church',
+      description: 'Join Rise-Up Bible Church for weekly gatherings, worship services, and special events in Osizweni and Benoni.',
+      url: window.location.pathname,
+      image: '/logo.jpg',
+    });
+  }, []);
 
   const upcomingEvents = [
     {

@@ -1,6 +1,17 @@
+import { useEffect } from 'react';
 import { BookOpen, Users, Globe, Mic, Heart, Target } from 'lucide-react';
+import { setSeoMetadata } from '../lib/seo';
 
 export default function About() {
+  useEffect(() => {
+    setSeoMetadata({
+      title: 'About Rise-Up Bible Church',
+      description: 'Learn about our vision, mission, and ministry at Rise-Up Bible Church in Osizweni and Benoni.',
+      url: window.location.pathname,
+      image: '/logo.jpg',
+    });
+  }, []);
+
   return (
     <main className="flex-grow pt-20">
       <div className="w-full bg-background min-h-screen">

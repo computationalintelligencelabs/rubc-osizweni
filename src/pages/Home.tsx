@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import { User, Clock, ArrowRight, Phone, Send, CheckCircle, AlertCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { setSeoMetadata } from '../lib/seo';
 import { submitContactForm, type ContactFormData } from '../lib/basinService';
 import { blogPosts } from '../data';
 
@@ -19,6 +20,15 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contactError, setContactError] = useState('');
   const [contactSuccess2, setContactSuccess2] = useState(false);
+
+  useEffect(() => {
+    setSeoMetadata({
+      title: 'Rise-Up Bible Church | Home',
+      description: 'Rise-Up Bible Church in Osizweni and Benoni equips believers for worship, teaching, discipleship, and community outreach.',
+      url: window.location.pathname,
+      image: '/logo.jpg',
+    });
+  }, []);
 
   const handleContactChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

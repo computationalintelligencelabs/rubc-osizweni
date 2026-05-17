@@ -1,10 +1,23 @@
+import { useEffect } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock } from 'lucide-react';
+import { setSeoMetadata } from '../lib/seo';
 import { blogPosts } from '../data';
 
 export default function BlogPost() {
   const { id } = useParams<{ id: string }>();
   const post = blogPosts.find(p => p.id === id);
+
+  useEffect(() => {
+    if (post) {
+      setSeoMetadata({
+        title: `${post.title} | Rise-Up Bible Church`,
+        description: post.subtitle,
+        url: window.location.pathname,
+        image: post.image || '/logo.jpg',
+      });
+    }
+  }, [post]);
 
   if (!post) {
     return <Navigate to="/blog" replace />;
