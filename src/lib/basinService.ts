@@ -122,14 +122,14 @@ export async function submitContactForm(data: ContactFormData): Promise<{ succes
       const text = await response.text();
       throw new Error(`Submission error: ${response.status} ${response.statusText} ${text}`);
     }
-+
-+    const json = await response.json();
-+
-+    return {
-+      success: true,
-+      message: "Your message has been sent successfully. We'll get back to you soon!",
-+      id: json.id,
-+    };
+
+    const json = await response.json();
+
+    return {
+      success: true,
+      message: "Your message has been sent successfully. We'll get back to you soon!",
+      id: json.id,
+    };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
     console.error("Contact form submission error:", errorMessage);
